@@ -1,37 +1,84 @@
 import React from 'react';
-import { ChakraProvider, Box, theme } from '@chakra-ui/react';
-import { ColorModeSwitcher } from './ColorModeSwitcher';
-import Todos from './components/Todos';
+import Sidebar from './components/Sidebar';
+import Editor from './components/Editor';
+import { data } from './components/data';
+import Split from 'react-split';
+import { nanoid } from 'nanoid';
+import './styles.css';
 
-// import { Logo } from './Logo';
+export default function App() {
+  const [notes, setNotes] = React.useState(
+    () => JSON.parse(localStorage.getItem('notes')) || []
+  );
+  const [currentNoteId, setCurrentNoteId] = React.useState(
+    (notes[0] && notes[0].id) || ''
+  );
 
-function App() {
+  React.useEffect(() => {
+    localStorage.setItem('notes', JSON.stringify(notes));
+  }, [notes]);
+
+  function createNewNote() {
+    const newNote = {
+      id: nanoid(),
+      body: "# Type your markdown note's title here",
+    };
+    setNotes(prevNotes => [newNote, ...prevNotes]);
+    setCurrentNoteId(newNote.id);
+  }
+
+  function updateNote(text) {
+    // Put the most recently-modified note at the top
+    setNotes(oldNotes => {
+      const newArray = [];
+      for (let i = 0; i < oldNotes.length; i++) {
+        const oldNote = oldNotes[i];
+        if (oldNote.id === currentNoteId) {
+          newArray.unshift({ ...oldNote, body: text });
+        } else {
+          newArray.push(oldNote);
+        }
+      }
+      return newArray;
+    });
+  }
+
+  function deleteNote(event, noteId) {
+    event.stopPropagation();
+    setNotes(oldNotes => oldNotes.filter(note => note.id !== noteId));
+  }
+
+  function findCurrentNote() {
+    return (
+      notes.find(note => {
+        return note.id === currentNoteId;
+      }) || notes[0]
+    );
+  }
+
   return (
-    <ChakraProvider theme={theme}>
-      <Box fontSize="xl">
-        {/* <Grid minH="100vh" p={3}>
-          <ColorModeSwitcher justifySelf="flex-end" />
-          <VStack spacing={8}>
-            <Logo h="40vmin" pointerEvents="none" />
-            <Text>
-              Edit <Code fontSize="xl">src/App.js</Code> and save to reload.
-            </Text>
-            <Link
-              color="teal.500"
-              href="https://chakra-ui.com"
-              fontSize="2xl"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Learn Chakra
-            </Link>
-          </VStack>
-        </Grid> */}
-        <ColorModeSwitcher justifySelf="flex-end" />
-        <Todos />
-      </Box>
-    </ChakraProvider>
+    <main>
+      {notes.length > 0 ? (
+        <Split sizes={[30, 70]} direction="horizontal" className="split">
+          <Sidebar
+            notes={notes}
+            currentNote={findCurrentNote()}
+            setCurrentNoteId={setCurrentNoteId}
+            newNote={createNewNote}
+            deleteNote={deleteNote}
+          />
+          {currentNoteId && notes.length > 0 && (
+            <Editor currentNote={findCurrentNote()} updateNote={updateNote} />
+          )}
+        </Split>
+      ) : (
+        <div className="no-notes">
+          <h1>You have no notes</h1>
+          <button className="first-note" onClick={createNewNote}>
+            Create one now
+          </button>
+        </div>
+      )}
+    </main>
   );
 }
-
-export default App;
