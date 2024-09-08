@@ -8,12 +8,16 @@ import * as serviceWorker from './serviceWorker';
 const container = document.getElementById('root');
 const root = ReactDOM.createRoot(container);
 
-root.render(
-  <StrictMode>
-    <ColorModeScript />
-    <App />
-  </StrictMode>
-);
+// --------------18
+// root.render(
+//   <StrictMode>
+//     <ColorModeScript />
+//     <App />
+//   </StrictMode>
+// );
+
+// -------------17
+render(<App />, root);
 
 // If you want your app to work offline and load faster, you can change
 // unregister() to register() below. Note this comes with some pitfalls.
