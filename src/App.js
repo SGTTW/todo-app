@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Sidebar from './components/Sidebar';
 import Editor from './components/Editor';
 import { data } from './components/data';
@@ -12,7 +12,7 @@ export default function App() {
   );
   const [currentNoteId, setCurrentNoteId] = React.useState(
     (notes[0] && notes[0].id) || ''
-  );
+  );  
 
   React.useEffect(() => {
     localStorage.setItem('notes', JSON.stringify(notes));
